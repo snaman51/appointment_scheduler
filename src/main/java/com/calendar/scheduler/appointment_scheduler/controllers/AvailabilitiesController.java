@@ -23,20 +23,38 @@ public class AvailabilitiesController {
     @Operation(summary = "Get list of Availabilities", description = "Retrieve the list of Availabilities.")
     @GetMapping("/listavailabilities")
     public ResponseEntity<List<Availabilities>> listAvailabilities() {
-        return new ResponseEntity<>(availabilityRepo.findByStatusFalse(), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(availabilityRepo.findByStatusFalse(), HttpStatus.OK);
+        }
+        catch (Exception e) {
+            System.out.println("Failed to retrieve availabilities: " + e.getMessage());
+            return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "Create an Availability", description = "To create a new Availability.")
     @PostMapping("/createavailability")
     public ResponseEntity<String> createAvailability(@RequestBody Availabilities availability) {
-        Availabilities createdAvailability = availabilityRepo.save(availability);
-        return ResponseEntity.ok("Received availability: " + createdAvailability);
+        try {
+            Availabilities createdAvailability = availabilityRepo.save(availability);
+            return ResponseEntity.ok("Received availability: " + createdAvailability);
+        }
+        catch (Exception e) {
+            System.out.println("Failed to create availability: " + e.getMessage());
+            return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "Get list of Reservations", description = "Retrieve the list of Reservations.")
     @GetMapping("/listreservations")
     public ResponseEntity<List<Reservations>> listReservations() {
-        return new ResponseEntity<>(reservationRepo.findAll(), HttpStatus.OK);
+        try {
+            return new ResponseEntity<>(reservationRepo.findAll(), HttpStatus.OK);
+        }
+        catch (Exception e) {
+            System.out.println("Failed to retrieve reservations: " + e.getMessage());
+            return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "Get list of Reservations", description = "Retrieve the list of Reservations.")
@@ -48,28 +66,38 @@ public class AvailabilitiesController {
     @Operation(summary = "Create a Reservation", description = "To create a new Reservation. When a new reservation is created, the slot from availabilities is deleted.")
     @PostMapping("/createreservation")
     public ResponseEntity<String> createReservation(@RequestBody Reservations reservation) {
-        Reservations createdReservation = reservationRepo.save(reservation);
-        System.out.println();
-        availabilityRepo.updateStatusToTrue(reservation.getStartTime(),reservation.getEndTime());
-        return ResponseEntity.ok("Received availability: " + createdReservation);
+        try {
+            Reservations createdReservation = reservationRepo.save(reservation);
+            availabilityRepo.updateStatusToTrue(reservation.getStartTime(), reservation.getEndTime());
+            return ResponseEntity.ok("Received availability: " + createdReservation);
+        }
+        catch (Exception e) {
+            System.out.println("Failed to create reservation: " + e.getMessage());
+            return new ResponseEntity<>( HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "Delete a Reservation", description = "To delete a reservation.")
     @DeleteMapping("/deletereservation")
     public void deleteReservation(@RequestBody Reservations reservation) {
-        System.out.println(reservation.getStartTime());
-        System.out.println(reservation.getEndTime());
-        System.out.println(reservation.getEmail());
-        availabilityRepo.updateStatusToFalse(reservation.getStartTime(), reservation.getEndTime());
-        reservationRepo.deleteReservation(reservation.getStartTime(), reservation.getEndTime(), reservation.getEmail());
-    }
+        try {
+            availabilityRepo.updateStatusToFalse(reservation.getStartTime(), reservation.getEndTime());
+            reservationRepo.deleteReservation(reservation.getStartTime(), reservation.getEndTime(), reservation.getEmail());
+        }
+        catch (Exception e) {
+            System.out.println("Failed to delete reservation: " + e.getMessage());
+        }
+        }
 
     @Operation(summary = "Delete an Availability", description = "To delete an Availabilty.")
     @DeleteMapping("/deleteavailability")
     public void deleteAppointment(@RequestBody Availabilities availability) {
-        System.out.println(availability.getStartTime());
-        System.out.println(availability.getEndTime());
-        availabilityRepo.deleteAvailability(availability.getStartTime(), availability.getEndTime());
+        try {
+            availabilityRepo.deleteAvailability(availability.getStartTime(), availability.getEndTime());
+        }
+        catch (Exception e) {
+            System.out.println("Failed to delete availability: " + e.getMessage());
+        }
     }
        
 }
